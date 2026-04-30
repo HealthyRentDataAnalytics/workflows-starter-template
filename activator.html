@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activador de Workflow HR</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        .file-count { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Activador del Agente Documental HR</h1>
+    <p>Número de archivos a procesar: <span id="fileCount">0</span></p>
+    <form id="workflowForm">
+        <div class="g-recaptcha" data-sitekey="TU_SITE_KEY_AQUI"></div>
+        <br>
+        <button type="submit">Activar Workflow</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+        // Simular número de archivos (puedes cambiar esto según tu lógica)
+        document.getElementById('fileCount').textContent = Math.floor(Math.random() * 100) + 1;
+
+        document.getElementById('workflowForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                document.getElementById('message').textContent = 'Por favor, completa el captcha.';
+                return;
+            }
+
+            try {
+                const response = await fetch('https://tu-worker-url.workers.dev/api/workflow/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recaptcha: recaptchaResponse })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('message').textContent = `Workflow activado. ID: ${data.instanceId}`;
+                } else {
+                    document.getElementById('message').textContent = 'Error al activar el workflow.';
+                }
+            } catch (error) {
+                document.getElementById('message').textContent = 'Error de conexión.';
+            }
+        });
+    </script>
+</body>
+</html>

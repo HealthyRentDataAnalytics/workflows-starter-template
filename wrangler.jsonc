@@ -14,6 +14,9 @@
 	"observability": {
 		"enabled": true
 	},
+	"vars": {
+		"RESEND_API_KEY": "re_C3t5YR3L_GFaStwbghD5KHDQ1u1BpXLuL"
+	},
 	/**
 	 * Workflows
 	 * Define Workflows to orchestrate multi-step processes

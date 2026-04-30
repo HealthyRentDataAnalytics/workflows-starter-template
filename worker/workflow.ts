@@ -1,6 +1,12 @@
 import { WorkflowEntrypoint, WorkflowStep } from "cloudflare:workers";
 import type { WorkflowEvent } from "cloudflare:workers";
 
+interface Env {
+	WORKFLOW_STATUS: DurableObjectNamespace;
+	MY_WORKFLOW: any;
+	RESEND_API_KEY: string;
+}
+
 /**
  * This workflow showcases:
  * - Durable step execution with step.do
@@ -16,6 +22,9 @@ export class MyWorkflow extends WorkflowEntrypoint<
 > {
 	async run(event: WorkflowEvent<Record<string, unknown>>, step: WorkflowStep) {
 		const instanceId = event.instanceId;
+
+		// Send email notification
+		await this.sendEmailNotification();
 
 		// Notify Durable Object of step progress. Called outside step.do, so this
 		// operation may repeat. Safe here because updateStep is idempotent.
@@ -61,5 +70,31 @@ export class MyWorkflow extends WorkflowEntrypoint<
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		});
 		await notifyStep("final", "completed");
+	}
+
+	private async sendEmailNotification() {
+		try {
+			const response = await fetch('https://api.resend.com/emails', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${this.env.RESEND_API_KEY}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					from: 'workflow@tuapp.com', // Cambia esto por un dominio verificado en Resend
+					to: ['dataanalyticia@healthyrent.co'], // Cambia esto por el email destinatario
+					subject: 'Solicitud de encendido del agente documental HR',
+					text: 'Solicitud de encendido del agente documental HR',
+				}),
+			});
+
+			if (!response.ok) {
+				console.error('Error sending email:', await response.text());
+			} else {
+				console.log('Email sent successfully');
+			}
+		} catch (error) {
+			console.error('Failed to send email:', error);
+		}
 	}
 }
