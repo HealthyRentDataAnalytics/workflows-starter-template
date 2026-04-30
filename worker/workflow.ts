@@ -1,8 +1,9 @@
 import { WorkflowEntrypoint, WorkflowStep } from "cloudflare:workers";
 import type { WorkflowEvent } from "cloudflare:workers";
+import { WorkflowStatusDO } from "./durable-object";
 
 interface Env {
-	WORKFLOW_STATUS: DurableObjectNamespace;
+	WORKFLOW_STATUS: DurableObjectNamespace<WorkflowStatusDO>;
 	MY_WORKFLOW: any;
 	RESEND_API_KEY: string;
 }
